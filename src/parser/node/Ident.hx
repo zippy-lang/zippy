@@ -1,7 +1,6 @@
 package parser.node;
 
 class Ident extends Node {
-
     final value:String;
 
     public function new(line:Int, value:String) {

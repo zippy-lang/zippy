@@ -3,7 +3,6 @@ import lexer.Lexer;
 import parser.Parser;
 
 class Zippy {
-
     public static function main() {
         var code = File.getContent("./input.zip");
 

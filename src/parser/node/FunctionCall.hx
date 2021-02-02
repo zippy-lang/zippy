@@ -1,7 +1,6 @@
 package parser.node;
 
 class FunctionCall extends Node {
-
     public final parameters:Array<Expression>;
     public final target:Expression;
 

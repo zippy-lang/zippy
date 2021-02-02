@@ -1,7 +1,6 @@
 package parser.node;
 
 class Variable extends Node {
-
     public final name:String;
     public final value:Expression;
     public final mutable:Bool;

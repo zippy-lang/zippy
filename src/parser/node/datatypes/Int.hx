@@ -1,7 +1,6 @@
 package parser.node.datatypes;
 
 class IntN extends Node {
-
     public final value:Int;
 
     public function new(line:Int, value:Int) {

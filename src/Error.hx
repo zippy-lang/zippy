@@ -1,5 +1,4 @@
 class Error {
-
     public static function unexpectedToken() {
         // TODO: Implement
     }

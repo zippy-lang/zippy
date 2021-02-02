@@ -15,9 +15,10 @@ import lexer.Lexer;
 import parser.nodes.*;
 
 class Parser {
-
     final lexer:Lexer;
+
     public var ast = new Block(0);
+
     var currentToken:Token;
 
     public function new(lexer:Lexer) {
@@ -71,7 +72,7 @@ class Parser {
         return parameters;
     }
 
-    private function parseExpression(): Expression {
+    private function parseExpression():Expression {
         final output:Array<Node> = [];
         final operators:Array<Operator> = [];
 
@@ -83,59 +84,65 @@ class Parser {
             }
 
             switch (currentToken.type) {
-                case TokenType.Number: output.push(parseNumber());
-                case TokenType.Ident: {
-                    if (lexer.peekToken().type == TokenType.LParen) {
-                        var lastTarget: Expression = new Expression(currentToken.line, [new Ident(currentToken.line, currentToken.literal)]);
+                case TokenType.Number:
+                    output.push(parseNumber());
+                case TokenType.Ident:
+                    {
+                        if (lexer.peekToken().type == TokenType.LParen) {
+                            var lastTarget:Expression = new Expression(currentToken.line, [new Ident(currentToken.line, currentToken.literal)]);
 
-                        do {
-                            nextToken();
+                            do {
+                                nextToken();
 
-                            lastTarget = new Expression(currentToken.line, [new FunctionCall(currentToken.line, lastTarget, parseCallParameters())]);
-                        } while (lexer.peekToken().type == TokenType.LParen);
+                                lastTarget = new Expression(currentToken.line, [new FunctionCall(currentToken.line, lastTarget, parseCallParameters())]);
+                            } while (lexer.peekToken().type == TokenType.LParen);
 
-                        output.push(lastTarget.value[0]); // todo: is this necessary?
-                    } else {
-                        output.push(new Ident(currentToken.line, currentToken.literal));
+                            output.push(lastTarget.value[0]); // todo: is this necessary?
+                        } else {
+                            output.push(new Ident(currentToken.line, currentToken.literal));
+                        }
                     }
-                }
-                case TokenType.LParen: {
-                    operators.push(new LParen(currentToken.line));
-                    openBraces++;
-                }
-                case TokenType.RParen: {
-                    openBraces--;
-
-                    if (openBraces < 0) {
-                        break;
+                case TokenType.LParen:
+                    {
+                        operators.push(new LParen(currentToken.line));
+                        openBraces++;
                     }
+                case TokenType.RParen:
+                    {
+                        openBraces--;
 
-                    while (operators.length > 0 && operators[operators.length - 1].type != NodeType.LParen) {
-                        output.push(operators.pop());
+                        if (openBraces < 0) {
+                            break;
+                        }
+
+                        while (operators.length > 0 && operators[operators.length - 1].type != NodeType.LParen) {
+                            output.push(operators.pop());
+                        }
+
+                        if (operators.length > 0 && operators[operators.length - 1].type == NodeType.LParen) {
+                            operators.pop();
+                        }
                     }
+                default:
+                    {
+                        final op = switch (currentToken.type) {
+                            case TokenType.Plus: new Plus(currentToken.line);
+                            case TokenType.Minus: new Minus(currentToken.line);
+                            case TokenType.Divide: new Divide(currentToken.line);
+                            case TokenType.Multiply: new Multiply(currentToken.line);
+                            default: break;
+                        }
 
-                    if (operators.length > 0 && operators[operators.length - 1].type == NodeType.LParen) {
-                        operators.pop();
+                        while (operators.length != 0
+                            && (operators[operators.length - 1].precedence < op.precedence
+                                || (operators[operators.length - 1].precedence == op.precedence
+                                    && operators[operators.length - 1].associativity == OperatorAssociativity.Left))
+                            && operators[operators.length - 1].type != NodeType.LParen) {
+                            output.push(operators.pop());
+                        }
+
+                        operators.push(op);
                     }
-                }
-                default: {
-                    final op = switch (currentToken.type) {
-                        case TokenType.Plus: new Plus(currentToken.line);
-                        case TokenType.Minus: new Minus(currentToken.line);
-                        case TokenType.Divide: new Divide(currentToken.line);
-                        case TokenType.Multiply: new Multiply(currentToken.line);
-                        default: break;
-                    }
-
-                    while (operators.length != 0 && (operators[operators.length - 1].precedence < op.precedence 
-                        || (operators[operators.length - 1].precedence == op.precedence && operators[operators.length - 1].associativity == OperatorAssociativity.Left))
-                        && operators[operators.length - 1].type != NodeType.LParen) {
-
-                        output.push(operators.pop());
-                    }
-
-                    operators.push(op);
-                }
             }
 
             nextToken();
@@ -177,9 +184,11 @@ class Parser {
 
     function parseToken(block:Block) {
         switch (currentToken.type) {
-            case TokenType.Let | TokenType.Mut: block.addNode(parseVariable());
-            case TokenType.Ident: parseIdent();
-            default: 
+            case TokenType.Let | TokenType.Mut:
+                block.addNode(parseVariable());
+            case TokenType.Ident:
+                parseIdent();
+            default:
         }
     }
 }

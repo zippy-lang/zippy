@@ -14,7 +14,6 @@ enum NodeType {
     Divide;
     LParen;
     RParen;
-
     Int;
     String;
 }

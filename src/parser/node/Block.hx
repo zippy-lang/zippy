@@ -1,7 +1,6 @@
 package parser.node;
 
 class Block extends Node {
-
     public final body:Array<Node> = [];
 
     public function new(line:Int) {

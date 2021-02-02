@@ -3,7 +3,6 @@ package parser.node.operators;
 import parser.nodes.operators.Operator.OperatorAssociativity;
 
 class Plus extends Operator {
-
     public function new(line:Int) {
         this.line = line;
         this.type = NodeType.Plus;

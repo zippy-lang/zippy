@@ -7,7 +7,6 @@ enum TokenType {
     Ident;
     Number;
     String;
-
     Assign;
     Plus;
     Minus;
@@ -26,19 +25,16 @@ enum TokenType {
     SmallerThanOrEqual;
     BitAnd;
     BitOr;
-
     Comma;
     Semicolon;
     Dot;
     Colon;
-
     LParen;
     RParen;
     LBrace;
     RBrace;
     LBracket;
     RBracket;
-
     // Keywords
     Function;
     Let;
