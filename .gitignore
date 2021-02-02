@@ -1,3 +1,5 @@
 .haxelib/
 cpp/
+java/
 input.zip/
+ast.json
