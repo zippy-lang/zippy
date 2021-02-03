@@ -21,4 +21,6 @@ enum NodeType {
     Int;
     String;
     Function;
+    Return;
+    If;
 }
