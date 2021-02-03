@@ -1,9 +1,9 @@
 package parser.node.operators;
 
-class Plus extends Operator {
+class LogicOr extends Operator {
     public function new(line:Int, left:Node, right:Node) {
         super(line, left, right);
 
-        this.type = NodeType.Plus;
+        this.type = NodeType.LogicOr;
     }
 }

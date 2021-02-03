@@ -1,11 +1,12 @@
 package parser.node.operators;
 
-enum OperatorAssociativity {
-    Left;
-    Right;
-}
-
 class Operator extends Node {
-    public var precedence = 0;
-    public var associativity = OperatorAssociativity.Left;
+    public var left:Node;
+    public var right:Node;
+
+    public function new(line:Int, left:Node, right:Node) {
+        this.line = line;
+        this.left = left;
+        this.right = right;
+    }
 }

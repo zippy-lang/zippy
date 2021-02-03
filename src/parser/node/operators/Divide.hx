@@ -1,12 +1,9 @@
 package parser.node.operators;
 
-import parser.nodes.operators.Operator.OperatorAssociativity;
-
 class Divide extends Operator {
-    public function new(line:Int) {
-        this.line = line;
+    public function new(line:Int, left:Node, right:Node) {
+        super(line, left, right);
+
         this.type = NodeType.Divide;
-        this.precedence = 3;
-        this.associativity = OperatorAssociativity.Left;
     }
 }
