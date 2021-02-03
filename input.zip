@@ -1,7 +1,0 @@
-while x > 2 {
-    print("hi");
-}
-
-if 2 > x {
-    print("no");
-}
