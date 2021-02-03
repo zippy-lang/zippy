@@ -63,11 +63,8 @@ class Parser {
         switch (currentToken.type) {
             case TokenType.Let | TokenType.Mut:
                 block.addNode(parseVariable());
-            case TokenType.Ident | TokenType.Number | TokenType.LParen | TokenType.Minus:
-                {
-                    block.addNode(expressionParser.parseExpression());
-                }
             default:
+                block.addNode(expressionParser.parseExpression());
         }
     }
 }
