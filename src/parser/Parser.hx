@@ -36,7 +36,7 @@ class Parser {
         currentToken = lexer.readToken();
     }
 
-    function parseCallParameters() {
+    function parseCallParameters():Array<Expression> {
         final parameters:Array<Expression> = [];
 
         if (lexer.peekToken().type == TokenType.RParen) {
@@ -56,7 +56,7 @@ class Parser {
         return parameters;
     }
 
-    function parseVariable() {
+    function parseVariable():Variable {
         var mutable = currentToken.type == TokenType.Mut;
 
         if (lexer.peekToken().type != TokenType.Ident) {
