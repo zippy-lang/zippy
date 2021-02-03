@@ -20,4 +20,5 @@ enum NodeType {
     Negation;
     Int;
     String;
+    Function;
 }
