@@ -1,5 +1,5 @@
 ![Zippy Logo](https://raw.githubusercontent.com/zippy-lang/media/main/logo-128x128.png)
-
+[![Maintainability](https://api.codeclimate.com/v1/badges/b33070899a04bf5a4173/maintainability)](https://codeclimate.com/github/zippy-lang/zippy/maintainability)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzippy-lang%2Fzippy.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fzippy-lang%2Fzippy?ref=badge_shield)
 
 A modern programming language from the future.
