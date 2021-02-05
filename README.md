@@ -7,7 +7,7 @@
 A modern programming language from the future.
 
 Project status: Actively developed. Not ready for production use or HackerNews.
-Currently, Zip is an early prototype and hence has many hacky implementations.
+Currently, Zippy is an early prototype and hence has many hacky implementations.
 
 ## Contributing
 
