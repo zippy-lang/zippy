@@ -1,6 +1,6 @@
 package evaluator;
 
-import cpp.Object;
+import object.objects.Object;
 
 class Environment {
     final variables:Map<Int, Object> = new Map();
