@@ -1,14 +1,20 @@
-import sys.io.File;
-import lexer.Lexer;
+import evaluator.Evaluator;
+import compiler.Compiler;
 import parser.Parser;
+import lexer.Lexer;
+import sys.io.File;
 
 class Zippy {
     public static function main() {
-        var code = File.getContent("./input.zip");
+        final code = File.getContent("./input.zip");
 
-        var lexer = new Lexer(code);
-        var parser = new Parser(lexer);
+        final lexer = new Lexer(code);
+        final parser = new Parser(lexer);
         parser.generateAst();
         parser.writeAst();
+        final compiler = new Compiler();
+        compiler.compile(parser.ast);
+        final evaluator = new Evaluator(compiler.instructions.getBytes(), compiler.constants);
+        evaluator.eval();
     }
 }

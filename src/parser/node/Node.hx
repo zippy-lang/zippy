@@ -1,6 +1,11 @@
 package parser.node;
 
 class Node {
-    public var line = 0;
-    public var type = NodeType.Node;
+    public final line:Int;
+    public final type:NodeType;
+
+    public function new(line:Int, type:NodeType) {
+        this.line = line;
+        this.type = type;
+    }
 }
