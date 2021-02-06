@@ -31,7 +31,7 @@ class Compiler {
             case Expression:
                 final cExpression = cast(node, Expression);
                 compile(cExpression.value);
-            case Plus | Multiply | Equal | SmallerThan | GreaterThan:
+            case Plus | Multiply | Equal | SmallerThan | GreaterThan | Minus | Divide | Modulo:
                 final cOperator = cast(node, Operator);
                 compile(cOperator.left);
                 compile(cOperator.right);
@@ -42,6 +42,9 @@ class Compiler {
                     case Equal: emit(OpCode.Equal, []);
                     case SmallerThan: emit(OpCode.SmallerThan, []);
                     case GreaterThan: emit(OpCode.GreaterThan, []);
+                    case Minus: emit(OpCode.Minus, []);
+                    case Divide: emit(OpCode.Divide, []);
+                    case Modulo: emit(OpCode.Modulo, []);
                     default: // TODO: Error
                 }
             case Variable:
