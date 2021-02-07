@@ -14,7 +14,7 @@ class Evaluator {
     final constants:Array<Object>;
     final symbolTable:SymbolTable;
     var byteIndex = 0;
-    var env = new Environment(null);
+    var env = new Environment();
 
     public function new(byteCode:Bytes, constants:Array<Object>, symbolTable:SymbolTable) {
         this.byteCode = byteCode;
