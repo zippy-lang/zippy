@@ -1,4 +1,4 @@
-package parser.node;
+package parser.nodes;
 
 class Node {
     public final line:Int;

@@ -1,4 +1,4 @@
-package parser.node;
+package parser.nodes;
 
 class While extends Node {
     public final condition:Expression;

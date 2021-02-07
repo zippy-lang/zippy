@@ -1,4 +1,4 @@
-package parser.node.operators;
+package parser.nodes.operators;
 
 class Operator extends Node {
     public var left:Node;

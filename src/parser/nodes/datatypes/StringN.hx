@@ -1,4 +1,4 @@
-package parser.node.datatypes;
+package parser.nodes.datatypes;
 
 class StringN extends Node {
     public final value:String;

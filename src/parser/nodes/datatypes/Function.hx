@@ -1,4 +1,4 @@
-package parser.node.datatypes;
+package parser.nodes.datatypes;
 
 class FunctionN extends Node {
     public final parameters:Array<Ident>;

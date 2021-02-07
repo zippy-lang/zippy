@@ -14,7 +14,6 @@ class Parser {
     final expressionParser:ExpressionParser;
 
     public var ast = new Block(1);
-
     public var currentToken:Token;
 
     public function new(lexer:Lexer) {

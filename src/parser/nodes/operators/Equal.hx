@@ -1,4 +1,4 @@
-package parser.node.operators;
+package parser.nodes.operators;
 
 class Equal extends Operator {
     public function new(line:Int, left:Node, right:Node) {

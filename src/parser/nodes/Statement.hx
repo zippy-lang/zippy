@@ -1,4 +1,4 @@
-package parser.node;
+package parser.nodes;
 
 class Statement extends Node {
     public final value:Expression;

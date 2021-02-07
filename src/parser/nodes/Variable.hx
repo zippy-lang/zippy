@@ -1,4 +1,4 @@
-package parser.node;
+package parser.nodes;
 
 class Variable extends Node {
     public final name:String;

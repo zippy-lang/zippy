@@ -1,4 +1,4 @@
-package parser.node;
+package parser.nodes;
 
 class Block extends Node {
     public final body:Array<Node> = [];
