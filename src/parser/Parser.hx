@@ -143,6 +143,12 @@ class Parser {
         return new Return(currentToken.line, returnValue);
     }
 
+    function parseBreak():Break {
+        nextToken();
+
+        return new Break(currentToken.line);
+    }
+
     function parseIf():If {
         nextToken();
 
@@ -214,6 +220,8 @@ class Parser {
                 block.addNode(parseIf());
             case TokenType.While:
                 block.addNode(parseWhile());
+            case TokenType.Break:
+                block.addNode(parseBreak());
             case TokenType.Ident:
                 if (lexer.peekToken().type == TokenType.Assign) {
                     block.addNode(parseVariableAssign());

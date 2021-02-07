@@ -25,6 +25,7 @@ enum NodeType {
     Function;
     Boolean;
     Return;
+    Break;
     If;
     While;
 }

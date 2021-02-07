@@ -15,6 +15,9 @@ class Compiler {
     public var instructions = new BytesBuffer();
     public final symbolTable = new SymbolTable();
 
+    // Position of last break instruction
+    private var lastBreakPos:Int = -1;
+
     public function new() {}
 
     public function compile(node:Node) {
@@ -24,6 +27,9 @@ class Compiler {
                 for (blockNode in cBlock.body) {
                     compile(blockNode);
                 }
+            case Break:
+                lastBreakPos = instructions.length;
+                emit(OpCode.Jump, [0]);
             case Statement:
                 final cStatement = cast(node, Statement);
                 compile(cStatement.value.value);
@@ -93,6 +99,11 @@ class Compiler {
                 emit(OpCode.JumpNot, [0]);
                 compile(cWhile.block);
                 emit(OpCode.Jump, [jumpPos]);
+
+                if (lastBreakPos != -1) {
+                    overwriteInstruction(lastBreakPos, [instructions.length]);
+                    lastBreakPos = -1;
+                }
 
                 overwriteInstruction(jumpNotInstructionPos, [instructions.length]);
             case Int | Boolean:

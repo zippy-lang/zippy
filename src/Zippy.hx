@@ -13,7 +13,7 @@ class Zippy {
         final lexer = new Lexer(code);
         final parser = new Parser(lexer);
         parser.generateAst();
-        parser.writeAst();
+        // parser.writeAst();
         final compiler = new Compiler();
         compiler.compile(parser.ast);
         final evaluator = new Evaluator(compiler.instructions.getBytes(), compiler.constants, compiler.symbolTable);

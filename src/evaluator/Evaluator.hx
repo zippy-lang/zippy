@@ -22,22 +22,22 @@ class Evaluator {
     }
 
     public function eval() {
-        trace(byteCode.toHex());
+        // trace(byteCode.toHex());
 
         while (byteIndex < byteCode.length) {
             evalInstruction();
 
-            try {
-                if (stack.length > 0 && stack[stack.length - 1].type == ObjectType.Int) {
-                    trace(cast(stack[stack.length - 1], IntObject).value);
+            /* try {
+                    if (stack.length > 0 && stack[stack.length - 1].type == ObjectType.Int) {
+                        trace(cast(stack[stack.length - 1], IntObject).value);
 
-                    if (cast(stack[stack.length - 1], IntObject).value == 1969) {
-                        Sys.exit(1);
+                        if (cast(stack[stack.length - 1], IntObject).value == 1969) {
+                            Sys.exit(1);
+                        }
                     }
-                }
-            } catch (e) {
-                trace(e);
-            }
+                } catch (e) {
+                    trace(e);
+            }*/
         }
     }
 
