@@ -178,7 +178,9 @@ class ExpressionParser {
 
                 boolean;
 
-            default: new Ident(-1, "");
+            default:
+                parser.error.unexpectedToken("expression");
+                new Node(-1, NodeType.Ident);
         }
     }
 }
