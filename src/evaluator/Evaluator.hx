@@ -24,18 +24,13 @@ class Evaluator {
 
         while (byteIndex < byteCode.length) {
             evalInstruction();
-            /* 
-                try {
-                    if (!stack.isEmpty() && stack.first().type == ObjectType.Int) {
-                        trace(cast(stack.first(), IntObject).value);
-
-                        if (cast(stack.first(), IntObject).value == 1969) {
-                            Sys.exit(1);
-                        }
-                    }
-                } catch(e) {
-                    trace(e);
-            }*/
+            try {
+                if (!stack.isEmpty() && stack.first().type == ObjectType.Int) {
+                    trace(cast(stack.first(), IntObject).value);
+                }
+            } catch (e) {
+                trace(e);
+            }
         }
     }
 
