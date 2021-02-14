@@ -1,2 +1,2 @@
 #!/bin/sh
-haxe --main Zippy --interp -cp src
+haxe --main Zippy --interp -cp src -lib Console.hx

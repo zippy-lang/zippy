@@ -1,3 +1,4 @@
 -cp src
 -main Zippy
 -cpp cpp
+-lib Console.hx
