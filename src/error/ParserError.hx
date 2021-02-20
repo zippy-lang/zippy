@@ -32,7 +32,7 @@ class ParserError {
                 }
             }
 
-            if (spaces < min || min == 0) {
+            if (spaces < min) {
                 min = spaces;
             }
         }
