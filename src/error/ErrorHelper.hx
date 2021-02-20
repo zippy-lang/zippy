@@ -1,7 +1,6 @@
 package error;
 
 class ErrorHelper {
-
     public static function repeatString(length:Int, s:String):String {
         final buffer = new StringBuf();
 
@@ -31,10 +30,10 @@ class ErrorHelper {
                 line++;
                 linePos = 0;
             } else {
-                linePos++; 
+                linePos++;
             }
         }
-        
+
         return {
             line: line,
             linePos: linePos

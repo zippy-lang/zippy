@@ -1,7 +1,6 @@
 package compiler.debug;
 
 class LineNumberTable {
-
     final table:Map<Int, {line:Int, linePos:Int}> = new Map();
 
     public function new() {}

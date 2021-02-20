@@ -1,7 +1,6 @@
 package ast.nodes.datatypes;
 
 class FunctionN extends Node {
-
     public final parameters:Array<Ident>;
     public final block:Block;
 

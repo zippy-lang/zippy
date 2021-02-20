@@ -1,7 +1,6 @@
 package lexer;
 
 class Helper {
-    
     public static function isLinebreak(s:String):Bool {
         return ~/\r\n|\r|\n/.match(s);
     }

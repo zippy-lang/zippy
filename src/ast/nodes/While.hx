@@ -1,7 +1,6 @@
 package ast.nodes;
 
 class While extends Node {
-
     public final condition:Expression;
     public final block:Block;
 

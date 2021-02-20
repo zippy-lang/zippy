@@ -2,6 +2,7 @@ package lexer;
 
 class Lexer {
     public final code:String;
+
     var currentChar = ' ';
     var position = 0;
 
@@ -104,7 +105,7 @@ class Lexer {
             case "*": new Token(TokenType.Multiply, position, "*");
             case "%": new Token(TokenType.Modulo, position, "%");
             case ":": new Token(TokenType.Colon, position, ":");
-            case "\"": 
+            case "\"":
                 final string = readString();
                 new Token(TokenType.String, position, string);
             case "&":
@@ -137,7 +138,7 @@ class Lexer {
                 if (peekChar() == "=") {
                     readChar();
                     new Token(TokenType.GreaterThanOrEqual, position, ">=");
-                } else new Token(TokenType.GreaterThan,position, ">");
+                } else new Token(TokenType.GreaterThan, position, ">");
             case "\u{0}": new Token(TokenType.Eof, position, currentChar);
             default:
                 if (Helper.isNumber(currentChar)) {

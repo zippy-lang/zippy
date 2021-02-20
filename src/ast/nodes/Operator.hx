@@ -1,7 +1,6 @@
 package ast.nodes;
 
 class Operator extends Node {
-    
     public var left:Node;
     public var right:Node;
 

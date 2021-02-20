@@ -1,7 +1,6 @@
 package ast.nodes;
 
 class If extends Node {
-
     public final condition:Expression;
     public final consequence:Block;
     public final alternative:Block;

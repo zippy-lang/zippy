@@ -1,8 +1,8 @@
 package compiler.symbol;
 
 class SymbolScope {
-
     public final parent:SymbolScope = null;
+
     final symbols:Map<String, Symbol> = new Map();
 
     public function new(parent:SymbolScope) {

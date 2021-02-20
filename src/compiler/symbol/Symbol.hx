@@ -1,7 +1,6 @@
 package compiler.symbol;
 
 class Symbol {
-
     public final index:Int;
     public final mutable:Bool;
     public final origin:SymbolOrigin;

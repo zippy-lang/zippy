@@ -3,7 +3,6 @@ package error;
 import lexer.Token;
 
 class CompileError {
-
     static var init = {
         Console.logPrefix = "";
     }
@@ -23,7 +22,7 @@ class CompileError {
                     spaces++;
                 } else {
                     break;
-                }   
+                }
             }
 
             if (spaces < min) {
@@ -37,7 +36,7 @@ class CompileError {
     static function printCode(errorLine:Int, errorLinePosStart:Int, errorLinePosEnd:Int, message:String = null) {
         final codePreviewFull = Zippy.code.split("\n");
         final previewStart = ErrorHelper.clamp(1, errorLine - 2, errorLine - 2);
-        final previewEnd = ErrorHelper.clamp(1, codePreviewFull.length + 1, errorLine + 3) ;
+        final previewEnd = ErrorHelper.clamp(1, codePreviewFull.length + 1, errorLine + 3);
 
         final codePreview = codePreviewFull.slice(previewStart - 1, previewEnd);
         final minIndentation = getMinIndentation(codePreview);
@@ -67,17 +66,17 @@ class CompileError {
                     codeLineHighlighted.add(codeLine.substr(errorLinePosStart - minIndentation, literalLength));
                     codeLineHighlighted.add("</>");
                     codeLineHighlighted.add(codeLine.substr(errorLinePosStart - minIndentation + literalLength, codeLineHighlighted.length));
-    
+
                     Console.log('   $lineCount | ${codeLineHighlighted.toString()}');
-    
+
                     final underline = '${ErrorHelper.repeatString(errorLinePosStart - minIndentation, " ")}${ErrorHelper.repeatString(literalLength, "~")}';
-    
+
                     Console.log('   ${ErrorHelper.repeatString(lineCountWidth, " ")} | <#DE4A3F>$underline</>');
                 }
             } else {
                 Console.log('   $lineCount | $codeLine');
             }
-        } 
+        }
     }
 
     static function printHead(line:Int, linePos:Int, message:String) {
@@ -108,7 +107,7 @@ class CompileError {
 
         Sys.exit(0);
     }
-    
+
     public static function illegalToken(token:Token) {
         final position = ErrorHelper.resolvePosition(token.position);
         printHead(position.line, position.linePos, 'illegal token `${token.literal}` (${token.type})');

@@ -5,10 +5,9 @@ import lexer.Lexer;
 import sys.io.File;
 
 class Zippy {
-
     public static var filename:String;
     public static var code:String;
-    
+
     public static function main() {
         filename = "input.zip";
         code = File.getContent("./input.zip");
@@ -17,11 +16,11 @@ class Zippy {
 
         final parser = new Parser(lexer);
         parser.generateAst();
-        parser.writeAst(); 
+        parser.writeAst();
 
         final compiler = new Compiler();
         compiler.compile(parser.ast);
-        //compiler.writeByteCode(); 
+        // compiler.writeByteCode();
 
         final evaluator = new Evaluator(compiler.instructions.getBytes(), compiler.constants, compiler.lineNumberTable, compiler.localVariableTable);
         evaluator.eval();

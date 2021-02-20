@@ -8,7 +8,6 @@ import lexer.Lexer;
 import lexer.TokenType;
 
 class ExpressionParser {
-
     final parser:Parser;
     final lexer:Lexer;
 
@@ -69,12 +68,11 @@ class ExpressionParser {
         var left = term();
 
         while (true) {
-            final type = switch(parser.currentToken.type) {
+            final type = switch (parser.currentToken.type) {
                 case TokenType.Plus: NodeType.Plus;
                 case TokenType.Minus: NodeType.Minus;
                 default: break;
             }
-
 
             parser.nextToken();
             final nodePos = parser.currentToken.position;
@@ -89,7 +87,7 @@ class ExpressionParser {
         var left = signedFactor();
 
         while (true) {
-            final type = switch(parser.currentToken.type) {
+            final type = switch (parser.currentToken.type) {
                 case TokenType.Multiply: NodeType.Multiply;
                 case TokenType.Divide: NodeType.Divide;
                 case TokenType.Modulo: NodeType.Modulo;
@@ -144,13 +142,13 @@ class ExpressionParser {
                 if (parser.currentToken.type == TokenType.LParen) {
                     parser.parseCall(new Expression(parser.currentToken.position, ident)).value;
                 } else {
-                    ident; 
+                    ident;
                 }
 
             case TokenType.Number:
                 final number = parser.parseNumber();
                 parser.nextToken();
-                
+
                 number;
 
             case TokenType.String:
@@ -166,7 +164,7 @@ class ExpressionParser {
                 if (parser.currentToken.type == TokenType.LParen) {
                     parser.parseCall(new Expression(parser.currentToken.position, func)).value;
                 } else {
-                    func; 
+                    func;
                 }
 
             case TokenType.True:
@@ -187,7 +185,7 @@ class ExpressionParser {
 
                 ifN;
 
-            default: 
+            default:
                 CompileError.unexpectedToken(parser.currentToken, "expression");
                 new Node(-1, NodeType.Ident);
         }

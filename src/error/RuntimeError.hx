@@ -6,7 +6,6 @@ import compiler.debug.LineNumberTable;
 import haxe.ds.GenericStack;
 
 class RuntimeError {
-
     final callStack:GenericStack<ReturnAddress>;
     final lineNumberTable:LineNumberTable;
     final localVariableTable:LocalVariableTable;
@@ -26,7 +25,7 @@ class RuntimeError {
             final returnAddress = callStack.pop();
             final position = lineNumberTable.resolve(returnAddress.byteIndex);
             final functionName = localVariableTable.resolve(returnAddress.calledFunction.index - 2 * 5);
-            Console.log('   at ${functionName == null ? "[native]" : functionName } (???:${position.line}:${position.linePos + 1})');
+            Console.log('   at ${functionName == null ? "[native]" : functionName} (???:${position.line}:${position.linePos + 1})');
         }
 
         Console.log("   at (global)");

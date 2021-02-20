@@ -1,7 +1,6 @@
 package compiler.debug;
 
 class LocalVariableTable {
-
     final table:Map<Int, String> = new Map();
 
     public function new() {}
@@ -13,4 +12,4 @@ class LocalVariableTable {
     public function resolve(byteIndex:Int) {
         return table.get(byteIndex);
     }
-} 
+}

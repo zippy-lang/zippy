@@ -1,7 +1,6 @@
 package lexer;
 
 class Token {
-    
     public final type:TokenType;
     public final position:Int;
     public final literal:String;

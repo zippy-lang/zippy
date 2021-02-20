@@ -15,9 +15,9 @@ import haxe.io.Bytes;
 import haxe.ds.GenericStack;
 
 class Evaluator {
-
     public final stack:GenericStack<Object> = new GenericStack();
     public final callStack:GenericStack<ReturnAddress> = new GenericStack();
+
     final byteCode:Bytes;
     final constants:Array<Object>;
     final lineNumberTable:LineNumberTable;
@@ -25,6 +25,7 @@ class Evaluator {
     final builtInTable:BuiltInTable;
     var byteIndex = 0;
     final env = new Environment();
+
     public final error:RuntimeError;
 
     public function new(byteCode:Bytes, constants:Array<Object>, lineNumberTable:LineNumberTable, localVariableTable:LocalVariableTable) {
@@ -46,7 +47,7 @@ class Evaluator {
     function evalInstruction() {
         final opCode = OpCode.createByIndex(byteCode.get(byteIndex));
         byteIndex++;
-        
+
         switch (opCode) {
             case OpCode.Equals:
                 final left = stack.pop();
@@ -122,7 +123,7 @@ class Evaluator {
                 stack.add(new FunctionObj(builtInIndex, ObjectOrigin.BuiltIn));
             case OpCode.JumpNot:
                 final jumpIndex = readInt32();
-                
+
                 final conditionValue = cast(stack.pop(), FloatObj);
                 if (conditionValue.value == 0) {
                     byteIndex = jumpIndex;
@@ -152,7 +153,6 @@ class Evaluator {
                 stack.pop();
 
             default:
-
         }
     }
 

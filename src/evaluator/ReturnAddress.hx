@@ -3,7 +3,6 @@ package evaluator;
 import object.objects.FunctionObj;
 
 class ReturnAddress {
-
     public final byteIndex:Int;
     public final calledFunction:FunctionObj;
 

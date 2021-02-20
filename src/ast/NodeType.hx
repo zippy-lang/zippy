@@ -21,12 +21,10 @@ enum NodeType {
     Equal;
     Negation;
     Inversion;
-
     Float;
     String;
     Function;
     Boolean;
-
     Return;
     Break;
     If;

@@ -1,7 +1,6 @@
 package ast.nodes;
 
 class Node {
-
     public final position:Int;
     public final type:NodeType;
 

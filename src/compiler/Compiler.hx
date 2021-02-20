@@ -17,11 +17,11 @@ import ast.nodes.*;
 import ast.nodes.datatypes.*;
 
 class Compiler {
-
     public final constants:Array<Object> = [];
     public var instructions = new BytesBuffer();
     public final lineNumberTable = new LineNumberTable();
     public final localVariableTable = new LocalVariableTable();
+
     final symbolTable = new SymbolTable();
 
     // Position of last break instruction
@@ -30,14 +30,14 @@ class Compiler {
     var inExpression = false;
     var lastInstruction:OpCode = null;
 
-    public function new() { }
+    public function new() {}
 
     public function writeByteCode() {
         File.saveBytes("program.bite", instructions.getBytes());
     }
 
     public function compile(node:Node) {
-        switch(node.type) {
+        switch (node.type) {
             case NodeType.Block:
                 final cBlock = cast(node, Block);
 
@@ -57,9 +57,7 @@ class Compiler {
             case NodeType.Expression:
                 final cExpression = cast(node, Expression);
                 compile(cExpression.value);
-            case NodeType.Plus | NodeType.Multiply | NodeType.Equal | NodeType.SmallerThan | 
-                NodeType.GreaterThan | NodeType.Minus | NodeType.Divide | NodeType.Modulo:
-
+            case NodeType.Plus | NodeType.Multiply | NodeType.Equal | NodeType.SmallerThan | NodeType.GreaterThan | NodeType.Minus | NodeType.Divide | NodeType.Modulo:
                 final cOperator = cast(node, Operator);
                 compile(cOperator.left);
                 compile(cOperator.right);
@@ -141,7 +139,7 @@ class Compiler {
                 overwriteInstruction(jumpInstructionPos, [instructions.length]);
             case NodeType.FunctionCall:
                 final cCall = cast(node, FunctionCall);
-                
+
                 var i = cCall.parameters.length;
                 while (--i >= 0) {
                     compile(cCall.parameters[i]);
@@ -224,7 +222,7 @@ class Compiler {
             final currentBytes = instructions.getBytes().sub(0, instructions.length - 1);
             buffer.add(currentBytes);
             instructions = buffer;
-        } 
+        }
     }
 
     function overwriteInstruction(pos:Int, operands:Array<Int>) {

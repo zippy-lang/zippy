@@ -10,12 +10,12 @@ import lexer.Lexer;
 import ast.nodes.*;
 
 class Parser {
-
     final lexer:Lexer;
     final expressionParser:ExpressionParser;
+
     public var ast = new Block(1);
     public var currentToken:Token;
-    
+
     public function new(lexer:Lexer) {
         this.lexer = lexer;
 
@@ -46,7 +46,7 @@ class Parser {
 
     function parseBlock():Block {
         nextToken();
-        
+
         final block = new Block(currentToken.position);
 
         while (currentToken.type != TokenType.RBrace) {
@@ -185,7 +185,7 @@ class Parser {
             nextToken();
 
             assertToken(TokenType.LBrace, "`{`");
-            
+
             alternative = parseBlock();
         }
 
@@ -236,12 +236,18 @@ class Parser {
 
     function parseToken(block:Block) {
         switch (currentToken.type) {
-            case TokenType.Let | TokenType.Mut: block.addNode(parseVariable());
-            case TokenType.Return: block.addNode(parseReturn());
-            case TokenType.If: block.addNode(parseIf());
-            case TokenType.While: block.addNode(parseWhile());
-            case TokenType.Break: block.addNode(parseBreak());
-            case TokenType.LBrace: block.addNode(parseBlock());
+            case TokenType.Let | TokenType.Mut:
+                block.addNode(parseVariable());
+            case TokenType.Return:
+                block.addNode(parseReturn());
+            case TokenType.If:
+                block.addNode(parseIf());
+            case TokenType.While:
+                block.addNode(parseWhile());
+            case TokenType.Break:
+                block.addNode(parseBreak());
+            case TokenType.LBrace:
+                block.addNode(parseBlock());
             case TokenType.Ident:
                 if (lexer.peekToken().type == TokenType.Assign) {
                     block.addNode(parseVariableAssign());
@@ -251,7 +257,8 @@ class Parser {
                     block.addNode(new Statement(nodePos, expression));
                     assertSemicolon();
                 }
-            case TokenType.Illegal: CompileError.illegalToken(currentToken);
+            case TokenType.Illegal:
+                CompileError.illegalToken(currentToken);
             default:
                 final nodePos = currentToken.position;
                 final expression = expressionParser.parseExpression();

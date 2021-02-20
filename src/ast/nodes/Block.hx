@@ -1,7 +1,6 @@
 package ast.nodes;
 
 class Block extends Node {
-
     public final body:Array<Node> = [];
 
     public function new(position:Int) {

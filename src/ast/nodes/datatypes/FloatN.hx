@@ -1,7 +1,6 @@
 package ast.nodes.datatypes;
 
 class FloatN extends Node {
-
     public final value:Float;
 
     public function new(position:Int, value:Float) {
