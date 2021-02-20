@@ -1,15 +1,14 @@
 package parser;
 
-import parser.nodes.Boolean;
-import parser.nodes.datatypes.StringN;
+import ast.nodes.*;
+import ast.nodes.datatypes.*;
+import ast.NodeType;
+import error.CompileError;
 import lexer.Lexer;
-import parser.nodes.Node;
-import parser.nodes.operators.*;
-import parser.nodes.Ident;
 import lexer.TokenType;
-import parser.nodes.Expression;
 
 class ExpressionParser {
+
     final parser:Parser;
     final lexer:Lexer;
 
@@ -19,7 +18,7 @@ class ExpressionParser {
     }
 
     public function parseExpression():Expression {
-        return new Expression(parser.currentToken.line, disjunction());
+        return new Expression(parser.currentToken.position, disjunction());
     }
 
     function disjunction():Node {
@@ -27,9 +26,10 @@ class ExpressionParser {
 
         while (parser.currentToken.type == TokenType.LogicOr) {
             parser.nextToken();
+            final nodePos = parser.currentToken.position;
             final right = conjunction();
 
-            left = new LogicOr(parser.currentToken.line, left, right);
+            left = new Operator(nodePos, NodeType.LogicOr, left, right);
         }
 
         return left;
@@ -40,9 +40,10 @@ class ExpressionParser {
 
         while (parser.currentToken.type == TokenType.LogicAnd) {
             parser.nextToken();
+            final nodePos = parser.currentToken.position;
             final right = comparison();
 
-            left = new LogicAnd(parser.currentToken.line, left, right);
+            left = new Operator(nodePos, NodeType.LogicAnd, left, right);
         }
 
         return left;
@@ -51,38 +52,34 @@ class ExpressionParser {
     function comparison():Node {
         final left = numeric();
 
-        return switch (parser.currentToken.type) {
-            case TokenType.SmallerThan:
-                parser.nextToken();
-                final right = numeric();
-                new SmallerThan(parser.currentToken.line, left, right);
-            case TokenType.GreaterThan:
-                parser.nextToken();
-                final right = numeric();
-                new GreaterThan(parser.currentToken.line, left, right);
-            case TokenType.Equal:
-                parser.nextToken();
-                final right = numeric();
-                new Equal(parser.currentToken.line, left, right);
-            default: left;
+        final type = switch (parser.currentToken.type) {
+            case TokenType.SmallerThan: NodeType.SmallerThan;
+            case TokenType.GreaterThan: NodeType.GreaterThan;
+            case TokenType.Equal: NodeType.Equal;
+            default: return left;
         }
+
+        parser.nextToken();
+        final nodePos = parser.currentToken.position;
+        final right = numeric();
+        return new Operator(nodePos, type, left, right);
     }
 
     function numeric():Node {
         var left = term();
 
         while (true) {
-            left = switch (parser.currentToken.type) {
-                case TokenType.Plus:
-                    parser.nextToken();
-                    final right = term();
-                    new Plus(parser.currentToken.line, left, right);
-                case TokenType.Minus:
-                    parser.nextToken();
-                    final right = term();
-                    new Minus(parser.currentToken.line, left, right);
+            final type = switch(parser.currentToken.type) {
+                case TokenType.Plus: NodeType.Plus;
+                case TokenType.Minus: NodeType.Minus;
                 default: break;
             }
+
+
+            parser.nextToken();
+            final nodePos = parser.currentToken.position;
+            final right = term();
+            left = new Operator(nodePos, type, left, right);
         }
 
         return left;
@@ -92,38 +89,38 @@ class ExpressionParser {
         var left = signedFactor();
 
         while (true) {
-            left = switch (parser.currentToken.type) {
-                case TokenType.Multiply:
-                    parser.nextToken();
-                    final right = term();
-                    new Multiply(parser.currentToken.line, left, right);
-                case TokenType.Divide:
-                    parser.nextToken();
-                    final right = term();
-                    new Divide(parser.currentToken.line, left, right);
-                case TokenType.Modulo:
-                    parser.nextToken();
-                    final right = term();
-                    new Modulo(parser.currentToken.line, left, right);
+            final type = switch(parser.currentToken.type) {
+                case TokenType.Multiply: NodeType.Multiply;
+                case TokenType.Divide: NodeType.Divide;
+                case TokenType.Modulo: NodeType.Modulo;
                 default: break;
             }
+
+            parser.nextToken();
+            final nodePos = parser.currentToken.position;
+            final right = term();
+            left = new Operator(nodePos, type, left, right);
         }
 
         return left;
     }
 
     function signedFactor():Node {
-        final minus = parser.currentToken.type == TokenType.Minus;
+        return switch (parser.currentToken.type) {
+            case TokenType.Minus:
+                parser.nextToken();
 
-        if (minus) {
-            parser.nextToken();
+                final right = factor();
+
+                new Operator(parser.currentToken.position, NodeType.Negation, null, right);
+            case TokenType.Bang:
+                parser.nextToken();
+
+                final right = factor();
+
+                new Operator(parser.currentToken.position, NodeType.Inversion, null, right);
+            default: factor();
         }
-
-        final right = factor();
-
-        return if (minus) {
-            new Negation(parser.currentToken.line, right);
-        } else right;
     }
 
     function factor():Node {
@@ -133,7 +130,7 @@ class ExpressionParser {
                 final disjunction = disjunction();
 
                 if (parser.currentToken.type != TokenType.RParen) {
-                    parser.error.unexpectedToken("`)`");
+                    CompileError.unexpectedToken(parser.currentToken, "`)`");
                 }
 
                 parser.nextToken();
@@ -141,45 +138,57 @@ class ExpressionParser {
                 disjunction;
 
             case TokenType.Ident:
-                final ident = new Ident(parser.currentToken.line, parser.currentToken.literal);
+                final ident = new Ident(parser.currentToken.position, parser.currentToken.literal);
                 parser.nextToken();
 
                 if (parser.currentToken.type == TokenType.LParen) {
-                    parser.parseCall(new Expression(parser.currentToken.line, ident)).value;
+                    parser.parseCall(new Expression(parser.currentToken.position, ident)).value;
                 } else {
-                    ident;
+                    ident; 
                 }
 
             case TokenType.Number:
                 final number = parser.parseNumber();
                 parser.nextToken();
-
+                
                 number;
 
             case TokenType.String:
-                final string = new StringN(parser.currentToken.line, parser.currentToken.literal);
+                final string = new StringN(parser.currentToken.position, parser.currentToken.literal);
                 parser.nextToken();
 
                 string;
 
             case TokenType.Function:
                 parser.nextToken();
-                parser.parseFunction();
+                final func = parser.parseFunction();
+
+                if (parser.currentToken.type == TokenType.LParen) {
+                    parser.parseCall(new Expression(parser.currentToken.position, func)).value;
+                } else {
+                    func; 
+                }
 
             case TokenType.True:
-                final boolean = new Boolean(parser.currentToken.line, true);
+                final boolean = new Boolean(parser.currentToken.position, true);
                 parser.nextToken();
 
                 boolean;
 
             case TokenType.False:
-                final boolean = new Boolean(parser.currentToken.line, false);
+                final boolean = new Boolean(parser.currentToken.position, false);
                 parser.nextToken();
 
                 boolean;
 
-            default:
-                parser.error.unexpectedToken("expression");
+            case TokenType.If:
+                final ifN = parser.parseIf();
+                parser.nextToken();
+
+                ifN;
+
+            default: 
+                CompileError.unexpectedToken(parser.currentToken, "expression");
                 new Node(-1, NodeType.Ident);
         }
     }

@@ -25,6 +25,7 @@ enum TokenType {
     SmallerThanOrEqual;
     BitAnd;
     BitOr;
+
     Comma;
     Semicolon;
     Dot;
@@ -35,6 +36,7 @@ enum TokenType {
     RBrace;
     LBracket;
     RBracket;
+    
     // Keywords
     Function;
     Let;

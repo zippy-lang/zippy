@@ -7,6 +7,7 @@ enum OpCode {
     Pop;
     SetLocal;
     GetLocal;
+    GetBuiltIn;
     Ident;
     Jump;
     JumpNot;
@@ -16,4 +17,8 @@ enum OpCode {
     Subtract;
     Divide;
     Modulo;
+    Return;
+    Call;
+    Negate;
+    Invert;
 }

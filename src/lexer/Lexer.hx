@@ -2,34 +2,20 @@ package lexer;
 
 class Lexer {
     public final code:String;
-    public final filename:String;
-    public var currentLine = 1;
-    public var currentLineChar = 0;
-
     var currentChar = ' ';
     var position = 0;
 
-    public function new(code:String, filename:String) {
-        this.code = ~/\r\n|\r|\n/g.replace(code, "\n");
-        this.filename = filename;
-    }
-
-    function increaseCurrentLine() {
-        if (Helper.isLinebreak(currentChar)) {
-            currentLine++;
-            currentLineChar = 0;
-        }
+    public function new(code:String) {
+        this.code = code;
     }
 
     function readChar() {
-        increaseCurrentLine();
         currentChar = if (position >= code.length) {
             "\u{0}";
         } else {
             code.charAt(position);
         }
 
-        currentLineChar++;
         position++;
     }
 
@@ -78,7 +64,7 @@ class Lexer {
     }
 
     function eatWhitespace() {
-        while (currentChar == " " || Helper.isLinebreak(currentChar)) {
+        while (currentChar == " " || Helper.isLinebreak(currentChar) || currentChar == "\t") {
             readChar();
         }
     }
@@ -86,16 +72,14 @@ class Lexer {
     public function tokenize() {
         while (currentChar != "\u{0}") {
             final token = readToken();
-            trace('${token.line} ${token.type} ${token.literal}');
+            trace('${token.position} ${token.type} ${token.literal}');
         }
     }
 
     public function peekToken():Token {
         final lastPostion = position;
-        final lastLine = currentLine;
         final token = readToken();
         position = lastPostion;
-        currentLine = lastLine;
 
         return token;
     }
@@ -105,70 +89,73 @@ class Lexer {
         eatWhitespace();
 
         return switch (currentChar) {
-            case ".": new Token(TokenType.Dot, currentLine, ".");
-            case ";": new Token(TokenType.Semicolon, currentLine, ";");
-            case "(": new Token(TokenType.LParen, currentLine, "(");
-            case ")": new Token(TokenType.RParen, currentLine, ")");
-            case "{": new Token(TokenType.LBrace, currentLine, "{");
-            case "}": new Token(TokenType.RBrace, currentLine, "}");
-            case "[": new Token(TokenType.LBracket, currentLine, "[");
-            case "]": new Token(TokenType.RBracket, currentLine, "]");
-            case ",": new Token(TokenType.Comma, currentLine, ",");
-            case "+": new Token(TokenType.Plus, currentLine, "+");
-            case "-": new Token(TokenType.Minus, currentLine, "-");
-            case "/": new Token(TokenType.Divide, currentLine, "/");
-            case "*": new Token(TokenType.Multiply, currentLine, "*");
-            case "%": new Token(TokenType.Modulo, currentLine, "%");
-            case ":": new Token(TokenType.Colon, currentLine, ":");
-            case "\"": new Token(TokenType.String, currentLine, readString());
+            case ".": new Token(TokenType.Dot, position, ".");
+            case ";": new Token(TokenType.Semicolon, position, ";");
+            case "(": new Token(TokenType.LParen, position, "(");
+            case ")": new Token(TokenType.RParen, position, ")");
+            case "{": new Token(TokenType.LBrace, position, "{");
+            case "}": new Token(TokenType.RBrace, position, "}");
+            case "[": new Token(TokenType.LBracket, position, "[");
+            case "]": new Token(TokenType.RBracket, position, "]");
+            case ",": new Token(TokenType.Comma, position, ",");
+            case "+": new Token(TokenType.Plus, position, "+");
+            case "-": new Token(TokenType.Minus, position, "-");
+            case "/": new Token(TokenType.Divide, position, "/");
+            case "*": new Token(TokenType.Multiply, position, "*");
+            case "%": new Token(TokenType.Modulo, position, "%");
+            case ":": new Token(TokenType.Colon, position, ":");
+            case "\"": 
+                final string = readString();
+                new Token(TokenType.String, position, string);
             case "&":
                 if (peekChar() == "&") {
                     readChar();
-                    new Token(TokenType.LogicAnd, currentLine, "&&");
-                } else new Token(TokenType.BitAnd, currentLine, "&");
+                    new Token(TokenType.LogicAnd, position, "&&");
+                } else new Token(TokenType.BitAnd, position, "&");
             case "|":
                 if (peekChar() == "|") {
                     readChar();
-                    new Token(TokenType.LogicOr, currentLine, "|");
-                } else new Token(TokenType.BitOr, currentLine, "|");
+                    new Token(TokenType.LogicOr, position, "|");
+                } else new Token(TokenType.BitOr, position, "|");
             case "!":
                 if (peekChar() == "=") {
                     readChar();
-                    new Token(TokenType.NotEqual, currentLine, "!=");
-                } else new Token(TokenType.Bang, currentLine, "!");
+                    new Token(TokenType.NotEqual, position, "!=");
+                } else new Token(TokenType.Bang, position, "!");
             case "=":
                 if (peekChar() == "=") {
                     readChar();
-                    new Token(TokenType.Equal, currentLine, "==");
-                } else new Token(TokenType.Assign, currentLine, "=");
+                    new Token(TokenType.Equal, position, "==");
+                } else new Token(TokenType.Assign, position, "=");
 
             case "<":
                 if (peekChar() == "=") {
                     readChar();
-                    new Token(TokenType.SmallerThanOrEqual, currentLine, "<=");
-                } else new Token(TokenType.SmallerThan, currentLine, "<");
+                    new Token(TokenType.SmallerThanOrEqual, position, "<=");
+                } else new Token(TokenType.SmallerThan, position, "<");
             case ">":
                 if (peekChar() == "=") {
                     readChar();
-                    new Token(TokenType.GreaterThanOrEqual, currentLine, ">=");
-                } else new Token(TokenType.GreaterThan, currentLine, ">");
-            case "\u{0}": new Token(TokenType.Eof, currentLine, currentChar);
+                    new Token(TokenType.GreaterThanOrEqual, position, ">=");
+                } else new Token(TokenType.GreaterThan,position, ">");
+            case "\u{0}": new Token(TokenType.Eof, position, currentChar);
             default:
                 if (Helper.isNumber(currentChar)) {
-                    return new Token(TokenType.Number, currentLine, readNumber());
+                    final number = readNumber();
+                    return new Token(TokenType.Number, position, number);
                 }
 
                 if (Helper.isAscii(currentChar)) {
                     final ident = readIdent();
 
                     if (Keyword.isKeyword(ident)) {
-                        return new Token(Keyword.getKeyword(ident), currentLine, ident);
+                        return new Token(Keyword.getKeyword(ident), position, ident);
                     } else {
-                        return new Token(TokenType.Ident, currentLine, ident);
+                        return new Token(TokenType.Ident, position, ident);
                     }
                 }
 
-                return new Token(TokenType.Illegal, currentLine, currentChar);
+                return new Token(TokenType.Illegal, position, currentChar);
         }
     }
 }

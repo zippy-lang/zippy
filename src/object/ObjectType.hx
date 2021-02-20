@@ -1,6 +1,7 @@
 package object;
 
 enum ObjectType {
-    Int;
-    Boolean;
+    Float;
+    String;
+    Function;
 }
