@@ -23,3 +23,43 @@ jobs:
         with:
           name: zippy-linux
           path: cpp/Zippy
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.1.3
+      - name: Install dependencies
+        run: |
+          haxelib install console.hx
+          haxelib install hxcpp
+
+      - name: Build
+        run: haxe build.hxml
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: zippy-win
+          path: cpp/Zippy.exe
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.1.3
+      - name: Install dependencies
+        run: |
+          haxelib install console.hx
+          haxelib install hxcpp
+
+      - name: Build
+        run: haxe build.hxml
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: zippy-macos
+          path: cpp/Zippy 
