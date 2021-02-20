@@ -22,7 +22,7 @@ class Zippy {
         compiler.compile(parser.ast);
         // compiler.writeByteCode();
 
-        final evaluator = new Evaluator(compiler.instructions.getBytes(), compiler.constants, compiler.lineNumberTable, compiler.localVariableTable);
+        final evaluator = new Evaluator(compiler.instructions, compiler.constants, compiler.lineNumberTable, compiler.localVariableTable);
         evaluator.eval();
     }
 }

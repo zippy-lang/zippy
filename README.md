@@ -7,6 +7,8 @@ A modern programming language from the future.
 Project status: Actively developed. Not ready for production use or HackerNews.
 Currently, Zippy is an early prototype and hence has many hacky implementations.
 
+<a href="https://zippy.indiealistic.studio">Playground</a>
+
 ## Installation
 #### Compile it yourself
 1. Download and install [Haxe](https://haxe.org/).
@@ -14,7 +16,8 @@ Currently, Zippy is an early prototype and hence has many hacky implementations.
 3. Compile the project by executing `haxe build.hxml`.
 
 #### Download release binaries
-Pre-compiled binaries can be found [here](https://github.com/zippy-lan/zippy/releases).
+Release binaries can be found on the [releases tab](https://github.com/zippy-lang/zippy/releases). \
+Binaries of the latest unreleased version can be found on the [actions tab](https://github.com/zippy-lang/zippy/actions).
 
 ## Usage
 
