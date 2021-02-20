@@ -1,9 +1,6 @@
 package object.objects;
 
-class Object {
+interface Object {
     public final type:ObjectType;
-
-    public function new(type:ObjectType) {
-        this.type = type;
-    }
+    public function toString():String;
 }
