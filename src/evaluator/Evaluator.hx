@@ -45,7 +45,7 @@ class Evaluator {
     }
 
     function evalInstruction() {
-        final opCode = OpCode.createByIndex(byteCode.readByte());
+        final opCode = byteCode.readByte();
 
         switch (opCode) {
             case OpCode.ConcatString:
