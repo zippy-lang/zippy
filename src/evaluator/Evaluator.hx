@@ -1,5 +1,7 @@
 package evaluator;
 
+import object.ObjectWrapper;
+import object.objects.ArrayObj;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
 import compiler.debug.LocalVariableTable;
@@ -11,16 +13,15 @@ import object.objects.StringObj;
 import object.objects.FloatObj;
 import object.objects.FunctionObj;
 import object.ObjectType;
-import object.objects.Object;
 import code.OpCode;
 import haxe.ds.GenericStack;
 
 class Evaluator {
-    public final stack:GenericStack<Object> = new GenericStack();
+    public final stack:GenericStack<ObjectWrapper> = new GenericStack();
     public final callStack:GenericStack<ReturnAddress> = new GenericStack();
 
     final byteCode:BytesInput;
-    final constants:Array<Object>;
+    final constants:Array<ObjectWrapper>;
     final lineNumberTable:LineNumberTable;
     final localVariableTable:LocalVariableTable;
     final builtInTable:BuiltInTable;
@@ -28,7 +29,7 @@ class Evaluator {
 
     public final error:RuntimeError;
 
-    public function new(byteCode:BytesOutput, constants:Array<Object>, lineNumberTable:LineNumberTable, localVariableTable:LocalVariableTable) {
+    public function new(byteCode:BytesOutput, constants:Array<ObjectWrapper>, lineNumberTable:LineNumberTable, localVariableTable:LocalVariableTable) {
         this.byteCode = new BytesInput(byteCode.getBytes());
         this.constants = constants;
         this.lineNumberTable = lineNumberTable;
@@ -48,17 +49,44 @@ class Evaluator {
         final opCode = byteCode.readByte();
 
         switch (opCode) {
-            case OpCode.ConcatString:
-                final right = stack.pop();
-                final left = stack.pop();
+            case OpCode.Array:
+                final arrayLength = byteCode.readInt32();
 
-                stack.add(new StringObj('${left.toString()}${right.toString()}'));
+                final array = new ArrayObj();
+                for (i in 0...arrayLength) {
+                    array.unshift(stack.pop());
+                }
+
+                stack.add(new ObjectWrapper(array));
+            case OpCode.IndexGet:
+                try {
+                    final index = Std.int(cast(stack.pop().object, FloatObj).value);
+                    final array = cast(stack.pop().object, ArrayObj);
+
+                    stack.add(array.values[index]);
+                } catch (e) {
+                    error.error("index operator cannot be used with this type");
+                }
+            case OpCode.IndexSet:
+                final target = stack.pop();
+                final value = stack.pop().object;
+
+                try {
+                    target.object = value;
+                } catch (e) {
+                    error.error("index out of bounds");
+                }
+            case OpCode.ConcatString:
+                final right = stack.pop().object;
+                final left = stack.pop().object;
+
+                stack.add(new ObjectWrapper(new StringObj('${left.toString()}${right.toString()}')));
             case OpCode.Equals:
-                final right = stack.pop();
-                final left = stack.pop();
+                final right = stack.pop().object;
+                final left = stack.pop().object;
 
                 if (left.type != right.type) {
-                    stack.add(new FloatObj(0));
+                    stack.add(new ObjectWrapper(new FloatObj(0)));
                     return;
                 }
 
@@ -66,23 +94,27 @@ class Evaluator {
                     case ObjectType.Float:
                         final cLeft = cast(left, FloatObj).value;
                         final cRight = cast(right, FloatObj).value;
-                        stack.add(new FloatObj(cLeft == cRight ? 1 : 0));
+                        stack.add(new ObjectWrapper(new FloatObj(cLeft == cRight ? 1 : 0)));
                     case ObjectType.String:
                         final cLeft = cast(left, StringObj).value;
                         final cRight = cast(right, StringObj).value;
-                        stack.add(new FloatObj(cLeft == cRight ? 1 : 0));
+                        stack.add(new ObjectWrapper(new FloatObj(cLeft == cRight ? 1 : 0)));
                     default:
                 }
             case OpCode.Add | OpCode.Multiply | OpCode.SmallerThan | OpCode.GreaterThan | OpCode.Subtract | OpCode.Divide | OpCode.Modulo:
-                final right = stack.pop();
-                final left = stack.pop();
+                final right = stack.pop().object;
+                final left = stack.pop().object;
 
-                if (left.type != ObjectType.Float || right.type != ObjectType.Float) {
+                var cRight;
+                var cLeft;
+
+                try {
+                    cRight = cast(right, FloatObj).value;
+                    cLeft = cast(left, FloatObj).value;
+                } catch (e) {
                     error.error('cannot perform operation $opCode on left (${left.type}) and right (${right.type}) value');
+                    return;
                 }
-
-                final cRight = cast(right, FloatObj).value;
-                final cLeft = cast(left, FloatObj).value;
 
                 final result:Float = switch (opCode) {
                     case OpCode.Add: cLeft + cRight;
@@ -96,13 +128,13 @@ class Evaluator {
                     default: -1;
                 }
 
-                stack.add(new FloatObj(result));
+                stack.add(new ObjectWrapper(new FloatObj(result)));
             case OpCode.Constant:
-                final constantIndex = readInt32();
+                final constantIndex = byteCode.readInt32();
 
                 stack.add(constants[constantIndex]);
             case OpCode.SetLocal:
-                final localIndex = readInt32();
+                final localIndex = byteCode.readInt32();
 
                 final value = stack.pop();
 
@@ -112,7 +144,7 @@ class Evaluator {
 
                 env.setVariable(localIndex, value);
             case OpCode.GetLocal:
-                final localIndex = readInt32();
+                final localIndex = byteCode.readInt32();
 
                 final value = env.getVariable(localIndex);
 
@@ -122,22 +154,22 @@ class Evaluator {
 
                 stack.add(value);
             case OpCode.GetBuiltIn:
-                final builtInIndex = readInt32();
+                final builtInIndex = byteCode.readInt32();
 
-                stack.add(new FunctionObj(builtInIndex, ObjectOrigin.BuiltIn));
+                stack.add(new ObjectWrapper(new FunctionObj(builtInIndex, ObjectOrigin.BuiltIn)));
             case OpCode.JumpNot:
-                final jumpIndex = readInt32();
+                final jumpIndex = byteCode.readInt32();
 
                 final conditionValue = cast(stack.pop(), FloatObj);
                 if (conditionValue.value == 0) {
                     byteCode.position = jumpIndex;
                 }
             case OpCode.Jump:
-                final jumpIndex = readInt32();
+                final jumpIndex = byteCode.readInt32();
 
                 byteCode.position = jumpIndex;
             case OpCode.Call:
-                final calledFunction = cast(stack.pop(), FunctionObj);
+                final calledFunction = cast(stack.pop().object, FunctionObj);
                 callStack.add(new ReturnAddress(byteCode.position, calledFunction));
 
                 if (calledFunction.origin == ObjectOrigin.UserDefined) {
@@ -149,19 +181,14 @@ class Evaluator {
                 byteCode.position = callStack.pop().byteIndex;
             case OpCode.Negate:
                 final negValue = cast(stack.pop(), FloatObj).value;
-                stack.add(new FloatObj(-negValue));
+                stack.add(new ObjectWrapper(new FloatObj(-negValue)));
             case OpCode.Invert:
                 final invValue = cast(stack.pop(), FloatObj).value;
-                stack.add(new FloatObj(invValue == 1 ? 0 : 1));
+                stack.add(new ObjectWrapper(new FloatObj(invValue == 1 ? 0 : 1)));
             case OpCode.Pop:
                 stack.pop();
 
             default:
         }
-    }
-
-    function readInt32():Int {
-        final value = byteCode.readInt32();
-        return value;
     }
 }

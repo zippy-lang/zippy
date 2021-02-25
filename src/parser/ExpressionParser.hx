@@ -87,6 +87,14 @@ class ExpressionParser {
     function term():Node {
         var left = signedFactor();
 
+        switch (parser.currentToken.type) {
+            case TokenType.LParen:
+                return parser.parseCall(new Expression(parser.currentToken.position, left));
+            case TokenType.LBracket:
+                return parser.parseIndex(new Expression(parser.currentToken.position, left));
+            default:
+        }
+
         while (true) {
             final type = switch (parser.currentToken.type) {
                 case TokenType.Multiply: NodeType.Multiply;
@@ -140,11 +148,7 @@ class ExpressionParser {
                 final ident = new Ident(parser.currentToken.position, parser.currentToken.literal);
                 parser.nextToken();
 
-                if (parser.currentToken.type == TokenType.LParen) {
-                    parser.parseCall(new Expression(parser.currentToken.position, ident)).value;
-                } else {
-                    ident;
-                }
+                ident;
 
             case TokenType.Number:
                 final number = parser.parseNumber();
@@ -160,13 +164,7 @@ class ExpressionParser {
 
             case TokenType.Function:
                 parser.nextToken();
-                final func = parser.parseFunction();
-
-                if (parser.currentToken.type == TokenType.LParen) {
-                    parser.parseCall(new Expression(parser.currentToken.position, func)).value;
-                } else {
-                    func;
-                }
+                parser.parseFunction();
 
             case TokenType.True:
                 final boolean = new Boolean(parser.currentToken.position, true);
@@ -185,6 +183,12 @@ class ExpressionParser {
                 parser.nextToken();
 
                 ifN;
+
+            case TokenType.LBracket:
+                final array = parser.parseArray();
+                parser.nextToken();
+
+                array;
 
             default:
                 CompileError.unexpectedToken(parser.currentToken, "expression");
