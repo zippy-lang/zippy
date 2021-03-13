@@ -9,7 +9,11 @@ class BuiltInTable {
     public function new(evaluator:Evaluator) {
         this.evaluator = evaluator;
 
-        functions = [new PrintFunc(evaluator)];
+        functions = [
+            new PrintFunc(evaluator),
+            new ArrayLengthFunc(evaluator),
+            new ArrayPushFunc(evaluator)
+        ];
     }
 
     public function execute(index:Int) {
