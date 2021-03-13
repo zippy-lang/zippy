@@ -1,6 +1,6 @@
 package evaluator.builtin.functions;
 
-import object.objects.Object;
+import object.ObjectWrapper;
 
 class Function {
     final evaluator:Evaluator;
@@ -9,7 +9,7 @@ class Function {
         this.evaluator = evaluator;
     }
 
-    function returnValue(value:Object = null) {
+    function returnValue(value:ObjectWrapper = null) {
         if (value != null) {
             evaluator.stack.add(value);
         }

@@ -22,12 +22,15 @@ enum NodeType {
     Equal;
     Negation;
     Inversion;
+    Assign;
     Float;
     String;
     Function;
     Boolean;
+    Array;
     Return;
     Break;
     If;
     While;
+    Index;
 }
