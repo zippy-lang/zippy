@@ -8,6 +8,7 @@ enum NodeType {
     VariableAssign;
     Ident;
     FunctionCall;
+
     Plus;
     Minus;
     Multiply;
@@ -25,11 +26,8 @@ enum NodeType {
     String;
     Function;
     Boolean;
-    Array;
     Return;
     Break;
     If;
     While;
-    Index;
-    IndexAssign;
 }

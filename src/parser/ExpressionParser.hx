@@ -16,8 +16,8 @@ class ExpressionParser {
         this.lexer = lexer;
     }
 
-    public function parseExpression():Expression {
-        return new Expression(parser.currentToken.position, disjunction());
+    public function parseExpression():ExpressionNode {
+        return new ExpressionNode(parser.currentToken.position, disjunction());
     }
 
     function disjunction():Node {
@@ -28,7 +28,7 @@ class ExpressionParser {
             final nodePos = parser.currentToken.position;
             final right = conjunction();
 
-            left = new Operator(nodePos, NodeType.LogicOr, left, right);
+            left = new OperatorNode(nodePos, NodeType.LogicOr, left, right);
         }
 
         return left;
@@ -42,7 +42,7 @@ class ExpressionParser {
             final nodePos = parser.currentToken.position;
             final right = comparison();
 
-            left = new Operator(nodePos, NodeType.LogicAnd, left, right);
+            left = new OperatorNode(nodePos, NodeType.LogicAnd, left, right);
         }
 
         return left;
@@ -61,7 +61,7 @@ class ExpressionParser {
         parser.nextToken();
         final nodePos = parser.currentToken.position;
         final right = numeric();
-        return new Operator(nodePos, type, left, right);
+        return new OperatorNode(nodePos, type, left, right);
     }
 
     function numeric():Node {
@@ -78,7 +78,7 @@ class ExpressionParser {
             parser.nextToken();
             final nodePos = parser.currentToken.position;
             final right = term();
-            left = new Operator(nodePos, type, left, right);
+            left = new OperatorNode(nodePos, type, left, right);
         }
 
         return left;
@@ -86,14 +86,6 @@ class ExpressionParser {
 
     function term():Node {
         var left = signedFactor();
-
-        switch (parser.currentToken.type) {
-            case TokenType.LParen:
-                return parser.parseCall(new Expression(parser.currentToken.position, left));
-            case TokenType.LBracket:
-                return parser.parseIndex(new Expression(parser.currentToken.position, left));
-            default:
-        }
 
         while (true) {
             final type = switch (parser.currentToken.type) {
@@ -106,7 +98,7 @@ class ExpressionParser {
             parser.nextToken();
             final nodePos = parser.currentToken.position;
             final right = term();
-            left = new Operator(nodePos, type, left, right);
+            left = new OperatorNode(nodePos, type, left, right);
         }
 
         return left;
@@ -119,13 +111,13 @@ class ExpressionParser {
 
                 final right = factor();
 
-                new Operator(parser.currentToken.position, NodeType.Negation, null, right);
+                new OperatorNode(parser.currentToken.position, NodeType.Negation, null, right);
             case TokenType.Bang:
                 parser.nextToken();
 
                 final right = factor();
 
-                new Operator(parser.currentToken.position, NodeType.Inversion, null, right);
+                new OperatorNode(parser.currentToken.position, NodeType.Inversion, null, right);
             default: factor();
         }
     }
@@ -145,10 +137,14 @@ class ExpressionParser {
                 disjunction;
 
             case TokenType.Ident:
-                final ident = new Ident(parser.currentToken.position, parser.currentToken.literal);
+                final ident = new IdentNode(parser.currentToken.position, parser.currentToken.literal);
                 parser.nextToken();
 
-                ident;
+                if (parser.currentToken.type == TokenType.LParen) {
+                    parser.parseCall(new ExpressionNode(parser.currentToken.position, ident)).value;
+                } else {
+                    ident;
+                }
 
             case TokenType.Number:
                 final number = parser.parseNumber();
@@ -157,23 +153,29 @@ class ExpressionParser {
                 number;
 
             case TokenType.String:
-                final string = new StringN(parser.currentToken.position, parser.currentToken.literal);
+                final string = new StringNode(parser.currentToken.position, parser.currentToken.literal);
                 parser.nextToken();
 
                 string;
 
             case TokenType.Function:
                 parser.nextToken();
-                parser.parseFunction();
+                final func = parser.parseFunction();
+
+                if (parser.currentToken.type == TokenType.LParen) {
+                    parser.parseCall(new ExpressionNode(parser.currentToken.position, func)).value;
+                } else {
+                    func;
+                }
 
             case TokenType.True:
-                final boolean = new Boolean(parser.currentToken.position, true);
+                final boolean = new BooleanNode(parser.currentToken.position, true);
                 parser.nextToken();
 
                 boolean;
 
             case TokenType.False:
-                final boolean = new Boolean(parser.currentToken.position, false);
+                final boolean = new BooleanNode(parser.currentToken.position, false);
                 parser.nextToken();
 
                 boolean;
@@ -183,12 +185,6 @@ class ExpressionParser {
                 parser.nextToken();
 
                 ifN;
-
-            case TokenType.LBracket:
-                final array = parser.parseArray();
-                parser.nextToken();
-
-                array;
 
             default:
                 CompileError.unexpectedToken(parser.currentToken, "expression");

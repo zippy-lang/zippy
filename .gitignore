@@ -1,5 +1,6 @@
 .haxelib/
 cpp/
+debug/
 java/
 js/
 input.zip

@@ -1,6 +1,6 @@
 package ast.nodes;
 
-class Ident extends Node {
+class IdentNode extends Node {
     public final value:String;
 
     public function new(position:Int, value:String) {

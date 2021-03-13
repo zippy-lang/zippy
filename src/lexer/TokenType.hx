@@ -3,6 +3,7 @@ package lexer;
 enum TokenType {
     Illegal;
     Eof;
+
     Ident;
     Number;
     String;

@@ -13,7 +13,7 @@ class Parser {
     final lexer:Lexer;
     final expressionParser:ExpressionParser;
 
-    public var ast = new Block(1);
+    public var ast = new BlockNode(1);
     public var currentToken:Token;
 
     public function new(lexer:Lexer) {
@@ -41,13 +41,13 @@ class Parser {
     public function parseNumber():Node {
         final nodePos = currentToken.position;
         final n = Std.parseFloat(currentToken.literal);
-        return new FloatN(nodePos, n);
+        return new FloatNode(nodePos, n);
     }
 
-    function parseBlock():Block {
+    function parseBlock():BlockNode {
         nextToken();
 
-        final block = new Block(currentToken.position);
+        final block = new BlockNode(currentToken.position);
 
         while (currentToken.type != TokenType.RBrace) {
             if (currentToken.type == TokenType.Eof) {
@@ -61,18 +61,18 @@ class Parser {
         return block;
     }
 
-    public function parseFunction():FunctionN {
+    public function parseFunction():FunctionNode {
         final nodePos = currentToken.position;
 
         assertToken(TokenType.LParen, "`(`");
 
         nextToken();
 
-        final parameters:Array<Ident> = [];
+        final parameters:Array<IdentNode> = [];
 
         while (currentToken.type != TokenType.RParen) {
             if (currentToken.type == TokenType.Ident) {
-                parameters.push(new Ident(currentToken.position, currentToken.literal));
+                parameters.push(new IdentNode(currentToken.position, currentToken.literal));
                 if (lexer.peekToken().type != TokenType.Comma && lexer.peekToken().type != TokenType.RParen) {
                     CompileError.unexpectedToken(currentToken, "comma or closing parenthesis");
                 }
@@ -93,38 +93,15 @@ class Parser {
 
         nextToken();
 
-        return new FunctionN(nodePos, block, parameters);
+        return new FunctionNode(nodePos, block, parameters);
     }
 
-    public function parseIndex(target:Expression):Expression {
-        final nodePos = currentToken.position;
-
-        nextToken();
-        final index = expressionParser.parseExpression();
-        assertToken(TokenType.RBracket, "`]`");
-
-        final indexN = new Expression(nodePos, new Index(nodePos, target, index));
-
-        nextToken();
-        return switch (currentToken.type) {
-            case TokenType.LBracket:
-                parseIndex(indexN);
-            case TokenType.Assign:
-                nextToken();
-
-                new Expression(nodePos, new IndexAssign(nodePos, indexN, expressionParser.parseExpression()));
-            case TokenType.LParen:
-                parseCall(indexN);
-            default: indexN;
-        }
-    }
-
-    public function parseCall(target:Expression):Expression {
+    public function parseCall(target:ExpressionNode):ExpressionNode {
         final nodePos = currentToken.position;
 
         nextToken();
 
-        final callParameters:Array<Expression> = [];
+        final callParameters:Array<ExpressionNode> = [];
 
         while (currentToken.type != TokenType.RParen) {
             callParameters.push(expressionParser.parseExpression());
@@ -133,47 +110,22 @@ class Parser {
             } else if (currentToken.type == TokenType.Comma) {
                 nextToken();
             } else {
-                assertToken(TokenType.RParen, "comma or `)`");
+                assertToken(TokenType.RParen, "comma or closing parenthesis");
             }
         }
 
-        final call = new Expression(nodePos, new FunctionCall(nodePos, target, callParameters));
+        final call = new ExpressionNode(nodePos, new CallNode(nodePos, target, callParameters));
 
-        nextToken();
-
-        return switch (currentToken.type) {
-            case TokenType.LBracket:
-                parseIndex(call);
-            case TokenType.LParen:
-                parseCall(call);
-            default: call;
+        return if (lexer.peekToken().type == TokenType.LParen) {
+            nextToken();
+            parseCall(call);
+        } else {
+            nextToken();
+            call;
         }
     }
 
-    public function parseArray() {
-        final nodePos = currentToken.position;
-
-        nextToken();
-
-        final arrayElements:Array<Expression> = [];
-
-        while (currentToken.type != TokenType.RBracket) {
-            arrayElements.push(expressionParser.parseExpression());
-            if (currentToken.type == TokenType.Comma && lexer.peekToken().type == TokenType.RBracket) {
-                CompileError.unexpectedToken(currentToken, "identifier or `]`");
-            } else if (currentToken.type == TokenType.Comma) {
-                nextToken();
-            } else {
-                assertToken(TokenType.RBracket, "comma or `]`");
-            }
-        }
-
-        final array = new ArrayN(nodePos, arrayElements);
-
-        return array;
-    }
-
-    function parseVariable():Variable {
+    function parseVariable():VariableNode {
         final nodePos = currentToken.position;
 
         var mutable = currentToken.type == TokenType.Mut;
@@ -192,10 +144,10 @@ class Parser {
 
         assertSemicolon();
 
-        return new Variable(nodePos, name, value, mutable);
+        return new VariableNode(nodePos, name, value, mutable);
     }
 
-    function parseReturn():Return {
+    function parseReturn():ReturnNode {
         final nodePos = currentToken.position;
 
         nextToken();
@@ -204,19 +156,19 @@ class Parser {
 
         assertSemicolon();
 
-        return new Return(nodePos, returnValue);
+        return new ReturnNode(nodePos, returnValue);
     }
 
-    function parseBreak():Break {
+    function parseBreak():BreakNode {
         final nodePos = currentToken.position;
         nextToken();
 
         assertSemicolon();
 
-        return new Break(nodePos);
+        return new BreakNode(nodePos);
     }
 
-    public function parseIf():If {
+    public function parseIf():IfNode {
         final nodePos = currentToken.position;
 
         nextToken();
@@ -226,7 +178,7 @@ class Parser {
         assertToken(TokenType.LBrace, "`{`");
 
         final consequence = parseBlock();
-        var alternative:Block = null;
+        var alternative:BlockNode = null;
 
         if (lexer.peekToken().type == TokenType.Else) {
             nextToken();
@@ -237,10 +189,10 @@ class Parser {
             alternative = parseBlock();
         }
 
-        return new If(nodePos, condition, consequence, alternative);
+        return new IfNode(nodePos, condition, consequence, alternative);
     }
 
-    function parseWhile():While {
+    function parseWhile():WhileNode {
         final nodePos = currentToken.position;
 
         nextToken();
@@ -251,10 +203,10 @@ class Parser {
 
         final block = parseBlock();
 
-        return new While(nodePos, condition, block);
+        return new WhileNode(nodePos, condition, block);
     }
 
-    function parseVariableAssign() {
+    function parseVariableAssign():VariableAssignNode {
         final nodePos = currentToken.position;
         final name = currentToken.literal;
 
@@ -267,7 +219,7 @@ class Parser {
 
         assertSemicolon();
 
-        return new VariableAssign(nodePos, name, value);
+        return new VariableAssignNode(nodePos, name, value);
     }
 
     function assertToken(type:TokenType, expected:String) {
@@ -282,7 +234,7 @@ class Parser {
         }
     }
 
-    function parseToken(block:Block) {
+    function parseToken(block:BlockNode) {
         switch (currentToken.type) {
             case TokenType.Let | TokenType.Mut:
                 block.addNode(parseVariable());
@@ -302,7 +254,7 @@ class Parser {
                 } else {
                     final nodePos = currentToken.position;
                     final expression = expressionParser.parseExpression();
-                    block.addNode(new Statement(nodePos, expression));
+                    block.addNode(new StatementNode(nodePos, expression));
                     assertSemicolon();
                 }
             case TokenType.Illegal:
@@ -310,7 +262,7 @@ class Parser {
             default:
                 final nodePos = currentToken.position;
                 final expression = expressionParser.parseExpression();
-                block.addNode(new Statement(nodePos, expression));
+                block.addNode(new StatementNode(nodePos, expression));
                 assertSemicolon();
         }
     }
