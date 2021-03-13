@@ -160,7 +160,7 @@ class Evaluator {
             case OpCode.JumpNot:
                 final jumpIndex = byteCode.readInt32();
 
-                final conditionValue = cast(stack.pop(), FloatObj);
+                final conditionValue = cast(stack.pop().object, FloatObj);
                 if (conditionValue.value == 0) {
                     byteCode.position = jumpIndex;
                 }
@@ -180,10 +180,10 @@ class Evaluator {
             case OpCode.Return:
                 byteCode.position = callStack.pop().byteIndex;
             case OpCode.Negate:
-                final negValue = cast(stack.pop(), FloatObj).value;
+                final negValue = cast(stack.pop().object, FloatObj).value;
                 stack.add(new ObjectWrapper(new FloatObj(-negValue)));
             case OpCode.Invert:
-                final invValue = cast(stack.pop(), FloatObj).value;
+                final invValue = cast(stack.pop().object, FloatObj).value;
                 stack.add(new ObjectWrapper(new FloatObj(invValue == 1 ? 0 : 1)));
             case OpCode.Pop:
                 stack.pop();
